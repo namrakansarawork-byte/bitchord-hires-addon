@@ -6,7 +6,7 @@ const MANIFEST = {
   version: '1.0.0',
   resources: ['search', 'stream'],
   // Only offer this addon while the phone has a lossless-capable output.
-  checkValidLossless: 1,
+  checkValidLossless: 0,
   // Downloads enabled: BitChord can save the lossless file from this addon.
   allowDownloads: 1,
   settings: [
