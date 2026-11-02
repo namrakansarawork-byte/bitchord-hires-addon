@@ -23,7 +23,7 @@ const MANIFEST = {
     {
       key: 'atmos',
       type: 'select',
-      default: 'auto',
+      default: 'atmos',
       options: [
         { label: 'Stereo only', value: 'stereo' },
         { label: 'Dolby Atmos when available', value: 'auto' },
