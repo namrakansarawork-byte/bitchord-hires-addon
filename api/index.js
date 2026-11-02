@@ -92,9 +92,20 @@ export default async function handler(req, res) {
     if (!id) return json(res, 404, { error: 'missing id' });
 
     const stream = await resolveStream(id, url.searchParams.get('quality'));
-    if (!stream) return json(res, 404, { error: 'not available in this addon' });
 
-    return json(res, 200, stream);
+console.log('[STREAM DEBUG]', {
+  id,
+  requestedQuality: url.searchParams.get('quality'),
+  provider: stream?.provider,
+  codec: stream?.codec,
+  format: stream?.format,
+  sampleRate: stream?.sampleRate,
+  bitDepth: stream?.bitDepth
+});
+
+if (!stream) return json(res, 404, { error: 'not available in this addon' });
+
+return json(res, 200, stream);
   }
 
   return json(res, 404, { error: 'not found' });
