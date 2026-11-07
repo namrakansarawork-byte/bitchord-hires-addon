@@ -6,14 +6,14 @@ A lightweight BitChord HTTP addon that returns direct audio URLs only after chec
 
 | Source | Role | Default |
 |---|---|---|
-| Qobuz | Preferred audio source; requests the selected quality tier | Enabled |
-| Internet Archive | Independent audio catalogue; only verified FLAC files are returned | Enabled |
+| Internet Archive | Primary audio source; explicitly licensed items and verified FLAC files only | Enabled |
+| Qobuz | Secondary audio source; requests the selected quality tier through its configured upstream | Enabled |
 | Deezer | Search catalogue only; a result is resolved by matching the same recording against an audio source | Enabled |
 | Tidal | Optional provider; public upstream is not considered reliable until tested | Disabled |
 
 Set `ENABLE_TIDAL_UPSTREAM=true` only after confirming that your configured Tidal upstream can search and deliver valid audio files. Tidal is intentionally excluded from normal search and playback by default.
 
-A Qobuz ID is resolved by Qobuz. A Deezer catalogue ID can be matched against Qobuz, optional Tidal, and Internet Archive. The addon cannot safely switch a failed Qobuz ID to a different provider without track metadata; it will return a clean 404 rather than guess a different recording.
+Internet Archive is first in search ordering and tie-break resolution. Its results are restricted to items with an explicit recognized Creative Commons or Creative Commons public-domain license, and the license is checked again before streaming. A Qobuz ID is resolved by Qobuz. A Deezer catalogue ID can be matched against Internet Archive first, then Qobuz and optional Tidal. The addon cannot safely switch a failed Qobuz ID to a different provider without track metadata; it will return a clean 404 rather than guess a different recording.
 
 ## Audio verification
 
@@ -21,6 +21,7 @@ A Qobuz ID is resolved by Qobuz. A Deezer catalogue ID can be matched against Qo
 - The probe requests a small byte range. If a server ignores Range and responds with HTTP 200, the addon reads only a bounded prefix and cancels the response stream.
 - MP3 is accepted only when an MPEG audio frame header is found; a content-type header alone is not enough.
 - `HIGH` requires a verified FLAC file with at least 24-bit sample depth.
+- Internet Archive items without an explicit recognized Creative Commons/public-domain license are not surfaced or streamed; IA hosting alone is not treated as proof of permission.
 - `LOSSLESS` requires verified FLAC. `LOW` requests MP3 from Qobuz/Tidal; Internet Archive may return a lower-quality verified FLAC because its catalogue search is FLAC-only.
 - Unknown or failed probes are not labelled as FLAC and are not cached as successful results.
 

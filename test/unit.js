@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createCache } from '../lib/cache.js';
 import { describeAudioUrl, qualityLabel, __test } from '../lib/flac.js';
 import { health } from '../lib/router.js';
+import { __test as archiveTest } from '../lib/providers/archive.js';
 
 function buildFlacHeader(sampleRate, channels, bitDepth, totalSamples) {
   const bytes = new Uint8Array(64);
@@ -34,6 +35,10 @@ async function run() {
 
   assert.equal(qualityLabel({ codec: 'mp3' }), 'MP3');
   assert.equal(qualityLabel({ codec: 'mp3', bitrate: 320000 }), 'MP3 320 kbps');
+  assert.equal(archiveTest.isAllowedLicense('https://creativecommons.org/licenses/by/4.0/'), true);
+  assert.equal(archiveTest.isAllowedLicense('https://creativecommons.org/publicdomain/zero/1.0/'), true);
+  assert.equal(archiveTest.isAllowedLicense(''), false);
+  assert.equal(archiveTest.isAllowedLicense('https://example.com/license'), false);
   assert.match(qualityLabel({ codec: 'flac', sampleRate: 192000, bitDepth: 24 }), /24-bit \/ 192 kHz/);
 
   // A cache should coalesce concurrent requests and avoid caching misses.
@@ -70,6 +75,7 @@ async function run() {
   try {
     const report = await health();
     assert.equal(report.ok, true);
+    assert.deepEqual(report.audioSources, ['Internet Archive', 'Qobuz']);
     assert.equal(report.providers.find((provider) => provider.provider === 'tidal')?.enabled, false);
     assert.equal(report.providers.find((provider) => provider.provider === 'qobuz')?.httpStatus, 200);
   } finally {
@@ -97,7 +103,7 @@ async function run() {
     globalThis.fetch = originalFetch;
   }
 
-  console.log('UNIT OK: FLAC parsing, quality labels, bounded probing, cache coalescing and negative-cache prevention');
+  console.log('UNIT OK: FLAC parsing, license filtering, IA-first priority, quality labels, bounded probing, cache coalescing and negative-cache prevention');
 }
 
 run().catch((error) => {
