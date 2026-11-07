@@ -15,8 +15,8 @@ const MANIFEST = {
       type: 'select',
       default: 'lossless',
       options: [
-        { label: 'Lossless (FLAC, up to 24/192)', value: 'lossless' },
-        { label: 'High (FLAC, up to 24/96)', value: 'high' },
+        { label: 'Lossless (verified FLAC)', value: 'lossless' },
+        { label: 'Hi-Res (verified 24-bit FLAC)', value: 'high' },
         { label: 'Low (data saver)', value: 'low' },
       ],
     },
@@ -88,13 +88,19 @@ export default async function handler(req, res) {
   }
 
   if (path.startsWith('/stream/')) {
-    const id = decodeURIComponent(path.slice('/stream/'.length));
+    let id;
+    try { id = decodeURIComponent(path.slice('/stream/'.length)); }
+    catch { return json(res, 400, { error: 'invalid stream id encoding' }); }
     if (!id) return json(res, 404, { error: 'missing id' });
 
-   const stream = await resolveStream(id, url.searchParams.get('quality'));
-if (!stream) return json(res, 404, { error: 'not available in this addon' });
-
-return json(res, 200, stream);
+    try {
+      const stream = await resolveStream(id, url.searchParams.get('quality'));
+      if (!stream) return json(res, 404, { error: 'not available in this addon' });
+      return json(res, 200, stream);
+    } catch (err) {
+      console.error('[API] stream resolution failed:', err?.message || err);
+      return json(res, 502, { error: 'upstream stream resolution failed' });
+    }
   }
 
   return json(res, 404, { error: 'not found' });
