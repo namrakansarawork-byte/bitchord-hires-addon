@@ -10,7 +10,7 @@ const MANIFEST = {
     description: 'Multi-source lossless addon: Qobuz hi-res, Tidal, Monochrome, Netease, Deezer catalogue, Internet Archive. Automatic failover.',
     resources: ['search', 'stream'],
     bitchordAuth: true,
-    checkValidLossless: 1,
+    checkValidLossless: 0,
     allowDownloads: 1,
     settings: [
         {
